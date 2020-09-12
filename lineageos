@@ -124,25 +124,7 @@ function init {
     fi
 
     # download repo
-    sync
-
-    if [[ ! -z $PROPRIETARY_BLOBS_REPO ]]; then
-        echo "[INFO] Cloning device's proprietary blobs"
-
-        # We could possibly improve this by clever search in the device/ folder
-        # but that would be too much work
-        # - https://stackoverflow.com/a/18194523/1700053
-        #
-        # AS A USER: - if you don't want to download a whole repo, use the EXTRA_DOWNLOAD_X variables
-        #            - if you have the device itself you can use EXTRA_DOWNLOADS_* var
-        if [ ! -d "$PROPRIETARY_BLOBS_DIR" ]; then
-            git clone -b cm-14.1 --single-branch $PROPRIETARY_BLOBS_REPO $PROPRIETARY_BLOBS_DIR
-        else
-            pushd $PROPRIETARY_BLOBS_DIR > /dev/null 2>&1
-            git pull
-            popd > /dev/null 2>&1
-        fi
-    fi
+    repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
 
     echo "[INFO] Downloading extra files"
     while read -r download ; do
@@ -164,7 +146,6 @@ function init {
     chmod u+x build/envsetup.sh
     shopt -s expand_aliases
     source $BASE_DIR/build/envsetup.sh
-    breakfast $DEVICE_CODENAME
 
     echo "[INFO] Export environment setup into '$LINEAGEOS_DEV_INIT'."
     # Create own script so we user is free to modify its .bashrc
@@ -192,15 +173,7 @@ function sync {
     fi
 
     echo "[INFO] Sync repository"
-    repo sync --force-sync -c -j $(nproc --all)
-
-    if [[ ! -z $PROPRIETARY_BLOBS_REPO ]]; then
-        # update mupets
-        echo "[INFO] Updating device's proprietary blobs repository"
-        pushd $PROPRIETARY_BLOBS_DIR > /dev/null 2>&1
-        git pull
-        popd > /dev/null 2>&1
-    fi
+    repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
 }
 
 function build {
@@ -209,17 +182,16 @@ function build {
         source "$PRE_BUILD_SCRIPT"
     fi
 
-    echo "[INFO] Building LineageOS ..."
+    echo "[INFO] Building Pixel Experience ..."
     shopt -s expand_aliases
     source $BASE_DIR/build/envsetup.sh
     if [[ "$USE_CCACHE" == "1" ]]; then
         prebuilts/misc/linux-x86/ccache/ccache -M $CCACHE_SIZE
     fi
     # starts configuration
-    breakfast $DEVICE_CODENAME
+    lunch aosp_$device-userdebug
     # starts building
-    croot
-    brunch $DEVICE_CODENAME
+    mka bacon
 
     if [[ ! -z $POST_BUILD_SCRIPT ]]; then
         echo "[INFO] Run post-build script"
