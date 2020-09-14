@@ -49,6 +49,7 @@ RUN set -ex ;\
           libxml2-utils \
           lzop \
           pngcrush \
+          repo \
           rsync \
           schedtool \
           squashfs-tools \
