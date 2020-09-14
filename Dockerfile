@@ -77,7 +77,7 @@ RUN set -ex ;\
 RUN set -ex ;\
     # User setup
     # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
-    groupadd -r lineageos && useradd -r -g lineageos lineageos && usermod -u 1000 lineageos ;\
+    groupadd -r lineageos && useradd -r -g lineageos lineageos && usermod -u 1002 lineageos ;\
     # allow non-root user to remount fs
     # adding ALL permissions so they can do other stuff in the future, like sudo vim
     echo "lineageos ALL=NOPASSWD: ALL" >> /etc/sudoers ;\
